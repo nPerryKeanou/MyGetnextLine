@@ -33,3 +33,63 @@ Vous devriez pouvoir appeler get_next_line() une fois avec le fd 3, puis le 4, l
 
 Les fonctions open() et close() sont des fonctions fondamentales en programmation informatique. Elles permettent d'ouvrir et de fermer des ressources, telles que des fichiers, des sockets ou des connexions réseau.
 
+La fonction read() retourne le nombre d'octets lus, ou -1 en cas d'erreur.
+
+Si la fonction read() réussit, elle retourne le nombre d'octets lus depuis le fichier ou le socket spécifié. Ce nombre peut être inférieur au nombre d'octets demandé si le fichier ou le socket est terminé, ou s'il n'y a pas assez d'espace dans le tampon.
+
+Si la fonction read() échoue, elle retourne -1 et errno est mis à jour pour indiquer la raison de l'échec. Les erreurs courantes incluent :
+
+EBADF : le descripteur de fichier spécifié est invalide.
+EAGAIN : le système n'a pas de données disponibles pour le moment.
+EIO : une erreur d'E/S s'est produite.
+EINVAL : le nombre d'octets demandés est invalide.
+ENOMEM : la mémoire n'a pas pu être allouée pour le tampon.
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+La fonction get_next_line est une fonction qui permet de lire une ligne d'un fichier, une ligne à la fois.
+
+La fonction fonctionne comme suit :
+
+Elle ouvre le fichier en mode lecture seule.
+Elle lit le fichier jusqu'à ce qu'elle rencontre un caractère de fin de ligne (\n).
+Elle stocke la ligne lue dans une variable statique.
+Elle ferme le fichier.
+Elle retourne la ligne lue à l'appelant.
+La fonction get_next_line est répétée jusqu'à ce que le fichier soit vide ou qu'une erreur se produise.
+
+La variable statique buf est utilisée pour stocker la ligne lue. La fonction get_next_line utilise la variable buf pour savoir où démarrer la lecture au prochain appel de la fonction.
+
+Voici un diagramme qui illustre le fonctionnement de la fonction get_next_line :
+
+                           |
+                           |
+                           |
+         Ouverture du    |
+         fichier         |
+                           |
+                           |
+                           |
+         Lecture du     |
+         fichier         |
+                           |
+                           |
+                           |
+         Stockage de la |
+         ligne lue      |
+                           |
+                           |
+                           |
+         Fermeture du   |
+         fichier         |
+                           |
+                           |
+                           |
+         Retour de la   |
+         ligne lue      |
+                           |
+                           |
+                           |
+
+
+Le buffer de read() est vide au début. Au fur et à mesure que read() lit des octets, il les stocke dans le buffer. Une fois la lecture terminée, le buffer contient tous les octets qui ont été lus.

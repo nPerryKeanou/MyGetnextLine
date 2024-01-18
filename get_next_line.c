@@ -7,9 +7,10 @@
 
 /**
  * 
- * 1) Donc soit on lit sur l'entrée standard soit on lit depuis un fichiers ou les deux en même temps.
- * 2) Il faut parcourir le fichier tant que l'on tombe sur un '\0', un EOF ou un NULL.
- * 3) IL faut stocker la ligne parcourut dans un buffer.
+ * 1) Donc soit on lit sur l'entrée standard soit on lit depuis un fichiers ou les deux en même temps. avec open et read
+ * 2) Il faut parcourir le fichier tant que l'on tombe sur un '\0', un EOF ou un NULL. avec ft_strnstr modifier
+ * 3) IL faut stocker la ligne parcourut dans un buffer. Donc je dois allouer de la mémoire par rapport a ce que read renvoie comme valeur.
+ *          read retourne le nb d'octet lu ou -1 en cas d'erreur.
  * 4) Il faut afficher cette ligne qui est stocké dans un buffer.
  * Et recommencer le processus.
 
@@ -17,33 +18,33 @@
 */
 
 //!!!!!!!!!!!!!!!!!!!!!!!!! utiliser memeset ou boucler mo-même pour mettre toutes les valeurs char à 0 lors de la créations d'un tab de char pour être sur qu'il n'y a pas de valeurs qui traine.
+/*
+    Pour lire le fichier ligne par ligne, il faut appeler la fonction get_next_line à répétition jusqu'à ce que la fonction retourne NULL. Cela signifie que la fonction n'a pas pu lire de ligne supplémentaire.
 
-int    get_stdin(int fd, char *buffer,  int size_buffer, int staticCountbuffer)
-{
-    //ici il faut boucler la lecture de l'entré standard jusqu'au moment ou l'on tombe sur \0 - eof - ou size_buff=...
-    //a chque incrémentation, on va incrémentation, on va incrémenter le int statique.
-    //lorsque l'on va retourner la fn, on va soit ici incrémente de 1 la statique ici ou dans une autre fn mais il faut incrémenter de 1 pour passer au char suivant.( si le char a passer est \Ø ou size_buffer=...)
-    //Pour ne pas recommencer a zero à chaque fois, il faut commencer à partir de la valeur de la statique.
-    //Donc la condition de la boucle, ce n'est pas ( tant que i != ...) mais (tant que statique != ...). On travail directement sur la statique.
-    //          avoir ce qui est le plus prudent, de bosser sur une copie de la statique ou de l'incrémeter directement.
-    //on doit quand même utiliser un i pour allouer de la mémoire.
-    //il faut savoir utilisser l'ouverture et fermeture des fichiers sans open et clsoe.
-}
 
-int    get_stdout(int fd, char *buffer, int size_buffer, int staticCountbuffer)
-{
-
-}
+- je vais essaier d'avoir une seul statique, qui sera un int. Ce sera le retour de read, et au prochain appel, repartira à partir de ce int index.
+- Pour ce faire, je peux stocker le buffer et pour lire la derniere ligne recun je peux lancer une fn qui va afficher les chars en la dernier et l'avant dernierx occurence de \0
+Comme ca j'ai pas besoin d'index. Et j'aurais la taille pour le malloc.
+*/
 
 char    *get_next_line(int fd)
 {
     int fd_read;
-    char *line;//line sera la ligne recuperer dans le fd et renvoyer 
+    int nb_read;
+    static int index;//int qui stock une copie de la valeur de retour de  read, on repartira à partir de lui au prochain appel de gnl.
+    char *buffer[BUFFER_SIZE];//char* qui stock la ligne lu dans le fichier et la retour
 
     fd_read = open(fd, O_RDONLY);
     if(fd_read < 0)
     {
         return(NULL);
     }
-    return(line);
+    //ici il faut faire une boucle pour dire ou arreter la lecture avec read.
+    // ex while()
+    nb_read = read(fd_read, buffer, BUFFER_SIZE);
+    if(nb_read < 0){
+        return(NULL);
+    }
+    close(fd_read);
+    return(buffer);
 }
