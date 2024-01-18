@@ -1,4 +1,9 @@
 #include "get_next_line.h"
+/*
+    Les fonctions open() et close() sont fondamentales en programmation informatique. Elles permettent l'ouverture et la fermetures de ressoureces
+    , telles que des fichiers, des sockets ou des connexion réseau.
+*/
+
 
 /**
  * 
@@ -10,6 +15,8 @@
 
  * 1-2 : On recupére fd pour savoir si on doit lire sur l'entre standard ou dans un fichier précis.
 */
+
+//!!!!!!!!!!!!!!!!!!!!!!!!! utiliser memeset ou boucler mo-même pour mettre toutes les valeurs char à 0 lors de la créations d'un tab de char pour être sur qu'il n'y a pas de valeurs qui traine.
 
 int    get_stdin(int fd, char *buffer,  int size_buffer, int staticCountbuffer)
 {
@@ -26,9 +33,7 @@ int    get_stdin(int fd, char *buffer,  int size_buffer, int staticCountbuffer)
     //Donc la condition de la boucle, ce n'est pas ( tant que i != ...) mais (tant que statique != ...). On travail directement sur la statique.
     //          avoir ce qui est le plus prudent, de bosser sur une copie de la statique ou de l'incrémeter directement.
     //on doit quand même utiliser un i pour allouer de la mémoire.
-    //Est ce qu'on doit allouer de la mémoire et stocker les chars lu pour les retourer et garder tout ce qu'on a lu dans la meme variables. Et reallouer de la mémoire av ce qu'il y a deja come char lu ?
-    // ou alors on doit juste allouer de la mémoire pour une phrase par une phrase ?
-    //ou alors on ne doit pas allouer et juste retourner ce qu'on lit ?
+    //il faut savoir utilisser l'ouverture et fermeture des fichiers sans open et clsoe.
 }
 
 int    get_stdout(int fd, char *buffer, int size_buffer, int staticCountbuffer)
@@ -37,13 +42,17 @@ int    get_stdout(int fd, char *buffer, int size_buffer, int staticCountbuffer)
 }
 
 char    *get_next_line(int fd){
-    char *buffer;
+    char *buffer;//buffer sera l'endroit ou l'on va stocker la string parcourut jusque \0 et sera lu par la fn. Elle sera utiliser par read().
+                //buffer doit allouer de la nouvelle mémoire à chaque fois que l'on appel car elle termine toujours pas \0
+                //On ne lui ajoute pas de la valeur, une fois que buf est lu, on le free et le remalloc.
+                
     int size_buffer;
     static int staticCountbuffer;
 
     staticCountbuffer = 0;
     if(fd == 0){
         //entrée standard.
+        
         get_stdin(fd, buffer, size_buffer, staticCountbuffer);
 
     }else if(fd == 1){
