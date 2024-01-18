@@ -20,12 +20,6 @@
 
 int    get_stdin(int fd, char *buffer,  int size_buffer, int staticCountbuffer)
 {
-    int returnCountRead;
-    int i;
-
-    //ici read va lire tout le fichiers d'une traite, nous nous voulons qu'il s'arrete lorsqu'il rencontre " \0 "  || EOF || SIZE_BUFFER DONNER EN ARGUMENT DE LA FN MAIN
-    returnCountRead = read(fd, (unsigned char)buffer, size_buffer);
-    i = 0;
     //ici il faut boucler la lecture de l'entré standard jusqu'au moment ou l'on tombe sur \0 - eof - ou size_buff=...
     //a chque incrémentation, on va incrémentation, on va incrémenter le int statique.
     //lorsque l'on va retourner la fn, on va soit ici incrémente de 1 la statique ici ou dans une autre fn mais il faut incrémenter de 1 pour passer au char suivant.( si le char a passer est \Ø ou size_buffer=...)
@@ -41,24 +35,15 @@ int    get_stdout(int fd, char *buffer, int size_buffer, int staticCountbuffer)
 
 }
 
-char    *get_next_line(int fd){
-    char *buffer;//buffer sera l'endroit ou l'on va stocker la string parcourut jusque \0 et sera lu par la fn. Elle sera utiliser par read().
-                //buffer doit allouer de la nouvelle mémoire à chaque fois que l'on appel car elle termine toujours pas \0
-                //On ne lui ajoute pas de la valeur, une fois que buf est lu, on le free et le remalloc.
-                
-    int size_buffer;
-    static int staticCountbuffer;
+char    *get_next_line(int fd)
+{
+    int fd_read;
+    char *line;//line sera la ligne recuperer dans le fd et renvoyer 
 
-    staticCountbuffer = 0;
-    if(fd == 0){
-        //entrée standard.
-        
-        get_stdin(fd, buffer, size_buffer, staticCountbuffer);
-
-    }else if(fd == 1){
-        //sortie standard.
-        get_stdout(fd, buffer, size_buffer, staticCountbuffer);
-    }else{
-        //
+    fd_read = open(fd, O_RDONLY);
+    if(fd_read < 0)
+    {
+        return(NULL);
     }
+    return(line);
 }

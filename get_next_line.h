@@ -10,6 +10,8 @@
 #include "fcntl.h"
 #include <sys/types.h>
 
+#define BUFFER_SIZE 1024
+
 char    *get_next_line(int fd);
 
 size_t  ft_strlen(char *s)

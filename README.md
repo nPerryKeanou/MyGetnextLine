@@ -27,3 +27,9 @@ Voici les bonus à réaliser :
 • Complétez get_next_line() en lui permettant de gérer plusieurs fd.
 Par exemple, si les fd 3, 4 et 5 sont accessibles en lecture, alors il est possible de les lire chacun leur tour sans jamais perdre les contenus lus sur chacun des fd, et sans retourner la mauvaise ligne.
 Vous devriez pouvoir appeler get_next_line() une fois avec le fd 3, puis le 4, le 5, puis à nouveau le 3, à nouveau le 4, etc.
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+Les fonctions open() et close() sont des fonctions fondamentales en programmation informatique. Elles permettent d'ouvrir et de fermer des ressources, telles que des fichiers, des sockets ou des connexions réseau.
+
