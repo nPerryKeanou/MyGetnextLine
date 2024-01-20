@@ -1,15 +1,5 @@
 #include "get_next_line.h"
 
-size_t  ft_strlen(char *s){
-    size_t i;
-
-    i = 0;
-    while(s[i] != '\0'){
-        i++;
-    }
-    return(i);
-}
-
 void    ft_putchar(char c)
 {
     write(1, &c, 1);
@@ -21,6 +11,26 @@ void    ft_putstr(char *str)
         write(1, &str, 1);
         str++;
     }
+}
+
+size_t  ft_strlen(char *s){
+    size_t i;
+
+    i = 0;
+    while(s[i] != '\0'){
+        i++;
+    }
+    return(i);
+}
+
+size_t  ft_strlen_const(const char *s){
+    size_t i;
+
+    i = 0;
+    while(s[i] != '\0'){
+        i++;
+    }
+    return(i);
 }
 
 /**
@@ -60,4 +70,51 @@ char    *ft_strnstr(const char *haystack, const char *needle, size_t len){
         i++;
     }
     return(NULL);
+}
+
+char    *ft_strdup(char  *s1){
+    size_t i;
+    size_t len_s1;
+    char    *new_s1;
+
+    i = 0;
+    len_s1 = ft_strlen(s1);
+    new_s1 = (char *)malloc(len_s1 + 1 * sizeof(char));
+    if(new_s1 == NULL){
+        return (NULL);
+    }
+    while(i < len_s1){
+        new_s1[i] = s1[i];
+        i++;
+    }
+    new_s1[i] = '\0';
+    return(new_s1);
+}
+
+char    *ft_strjoin(const char *s1, const char *s2){
+    size_t len_s1;
+    size_t len_s2;
+    size_t i;
+    size_t j;
+    char *str;
+
+    len_s1 = ft_strlen_const(s1);
+    len_s2 = ft_strlen_const(s2);
+    i = 0;
+    j = 0;
+    str = (char *)malloc(len_s1 + len_s2 + 1 * sizeof(char));
+    if(s1 == NULL || s2 == NULL || str == NULL){
+        return(NULL);
+    }
+    while(s1[i] != '\0'){
+        str[i] = s1[i];
+        i++;
+    }
+    while(s2[j] != '\0'){
+        str[i] = s2[j];
+        i++;
+        j++;
+    }
+    str[i] = '\0';
+    return(str);
 }

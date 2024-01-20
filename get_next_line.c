@@ -29,22 +29,48 @@ Comme ca j'ai pas besoin d'index. Et j'aurais la taille pour le malloc.
 
 char    *get_next_line(int fd)
 {
+    //lire le fd jusqu'au bout et afficher la lecture.
+    static char *final_line;
+    char    tmp_line[BUFFER_SIZE];
+    char    *tmp;
     int fd_read;
-    int nb_read;
-    static int index;//int qui stock une copie de la valeur de retour de  read, on repartira à partir de lui au prochain appel de gnl.
-    char *buffer[BUFFER_SIZE];//char* qui stock la ligne lu dans le fichier et la retour
+    int i;
+    int len_final_line;
 
-    fd_read = open(fd, O_RDONLY);
-    if(fd_read < 0)
+    i = 0;
+    len_final_line = ft_strlen(final_line);
+    fd_read = read(fd, tmp_line, BUFFER_SIZE);
+    if(fd_read <= 0)
     {
         return(NULL);
     }
-    //ici il faut faire une boucle pour dire ou arreter la lecture avec read.
-    // ex while()
-    nb_read = read(fd_read, buffer, BUFFER_SIZE);
-    if(nb_read < 0){
+    //final_line = (char*)malloc((BUFFER_SIZE + len_final_line + 1) * sizeof(char*));
+    if(!final_line)
+    {
         return(NULL);
     }
-    close(fd_read);
-    return(buffer);
+    if(len_final_line == 0)//si la longueur de statuc line == 0, ca veut dire ue c'est la premiere fois que l'on utilise. Donc on la rempli normalement.
+    {
+        final_line = ft_strdup(tmp_line);
+        if(!final_line)
+        {
+            return(NULL);
+        }
+    }
+    else//si la len de final_line est != de 0, on doit ajouter les char de line à partir de la fin de final_line.
+    {
+        tmp = ft_strjoin(final_line, tmp_line);
+        free(final_line);
+        final_line = tmp;
+        if(!final_line)
+        {
+            return(NULL);
+        }
+    }
+    // fn qui va afficher ce que final_tmp contient pour voir la différence avec tmp_line.
+    if(final_line)
+    {
+        ft_putstr(final_line);
+    }
+    return(final_line);
 }
