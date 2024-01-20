@@ -92,29 +92,40 @@ char    *ft_strdup(char  *s1){
 }
 
 char    *ft_strjoin(char *s1, char *s2){
-    size_t len_s1;
-    size_t len_s2;
+    printf("-------------------------------------- 1.2  4.5.1 ----------------------------\n");
     size_t i;
     size_t j;
     char *str;
-
-    len_s1 = ft_strlen(s1);
-    len_s2 = ft_strlen(s2);
+    printf("-------------------------------------- 1.2  4.5.2 ----------------------------\n");
+    if(!s1){
+        s1 = (char*)malloc(1 * sizeof(char));
+        if(!s1 || !s2){
+            return(NULL);
+        }
+        s1[0] = '\0';
+    }
     i = 0;
     j = 0;
-    str = (char *)malloc(len_s1 + len_s2 + 1 * sizeof(char));
-    if(s1 == NULL || s2 == NULL || str == NULL){
+    printf("-------------------------------------- 1.2  4.5.3 ----------------------------\n");
+    str = (char *)malloc(ft_strlen(s1) + ft_strlen(s2) + 1 * sizeof(char));
+    printf("-------------------------------------- 1.2  4.5.4 ----------------------------\n");
+    if(str == NULL){
         return(NULL);
     }
-    while(s1[i] != '\0'){
-        str[i] = s1[i];
-        i++;
+    if(s1){
+        while(s1[i] != '\0'){
+            str[i] = s1[i];
+            i++;
+        }
     }
     while(s2[j] != '\0'){
         str[i] = s2[j];
         i++;
         j++;
     }
-    str[i] = '\0';
+    printf("-------------------------------------- 1.2  4.5.7 ----------------------------\n");
+    str[ft_strlen(s1) + ft_strlen(s2)] = '\0';
+    free(s1);
+    printf("-------------------------------------- 1.2  4.5.8 ----------------------------\n");
     return(str);
 }

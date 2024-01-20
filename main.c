@@ -13,6 +13,7 @@ int main(void)
     while (i < 7)
 	{
         printf("ok\n");
+		printf("i -------------------------------------------------------------> %d\n", i);
 		line = get_next_line(fd1);
 		printf("line [%02d]: %s", i, line);
 		printf("- - -1 - - -\n");
@@ -26,6 +27,7 @@ int main(void)
 		printf("- - -3 - - -\n");
 		free(line);
 		i++;
+		
 	}
 	close(fd1);
 	close(fd2);
