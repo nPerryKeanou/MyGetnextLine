@@ -15,12 +15,15 @@ int main(void)
         printf("ok\n");
 		line = get_next_line(fd1);
 		printf("line [%02d]: %s", i, line);
+		printf("- - -1 - - -\n");
 		free(line);
 		line = get_next_line(fd2);
 		printf("line [%02d]: %s", i, line);
+		printf("- - -2 - - -\n");
 		free(line);
 		line = get_next_line(fd3);
 		printf("line [%02d]: %s", i, line);
+		printf("- - -3 - - -\n");
 		free(line);
 		i++;
 	}

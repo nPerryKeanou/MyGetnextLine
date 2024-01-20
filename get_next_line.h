@@ -13,9 +13,9 @@
 #define BUFFER_SIZE 1024
 
 char    *get_next_line(int fd);
-char    *ft_strnstr(const char *haystack, const char *needle, size_t len);
+char    *ft_strchr(char    *s, int c);
 char    *ft_strdup(char  *s1);
-char    *ft_strjoin(const char *s1, const char *s2);
+char    *ft_strjoin(char *s1, char *s2);
 
 
 size_t  ft_strlen(char *s);

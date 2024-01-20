@@ -1,5 +1,7 @@
 #include "get_next_line.h"
 
+
+
 void    ft_putchar(char c)
 {
     write(1, &c, 1);
@@ -45,29 +47,27 @@ Sinon, un pointeur sur le premier caractère de la première occurrence de needl
  * 
 */
 
-char    *ft_strnstr(const char *haystack, const char *needle, size_t len){
+char    *ft_strchr(char    *s, int c){
     size_t i;
-    size_t tmp;
-    size_t len_hays;
-    size_t len_need;
+    size_t len_s;
 
     i = 0;
-    len_hays = ft_strlen_const(haystack);
-    len_need = ft_strlen_const(needle);
-    if(len_need == 0){
-        return((char *)haystack);
+    len_s = ft_strlen(s);
+    if(s == NULL){
+        return(NULL);
     }
-    while(i < len && i + len_need <= len){
-        if(haystack[i] == needle[0]){
-            tmp = 0;
-            while(tmp < len_need && haystack[i + tmp] == needle[tmp]){
-                tmp++;
-            }
-            if(tmp == len_need){
-                return((char *)haystack + i);
-            }
+    if((unsigned char)c == '\0'){
+        //retourne direct la fin du la str s.
+        return((char*)s+len_s);
+    }
+    while(*(s) != '\0'){
+        if(*(s) == (unsigned char)c){
+            //on retourne donc l'endroit, l'espace mémoire, où se trouve la premiere occurence. Et non sa valeur.
+            //C'est pour ca que l'on convertit avec (char*), pour récuperer non la valeur mais l'adresse.
+            //En résumé, (char*)s est une conversion de type, tandis que *s est une opération de déréférencement qui donne accès à la valeur à laquelle s pointe.
+            return((char*)s);
         }
-        i++;
+        s++;
     }
     return(NULL);
 }
@@ -91,15 +91,15 @@ char    *ft_strdup(char  *s1){
     return(new_s1);
 }
 
-char    *ft_strjoin(const char *s1, const char *s2){
+char    *ft_strjoin(char *s1, char *s2){
     size_t len_s1;
     size_t len_s2;
     size_t i;
     size_t j;
     char *str;
 
-    len_s1 = ft_strlen_const(s1);
-    len_s2 = ft_strlen_const(s2);
+    len_s1 = ft_strlen(s1);
+    len_s2 = ft_strlen(s2);
     i = 0;
     j = 0;
     str = (char *)malloc(len_s1 + len_s2 + 1 * sizeof(char));

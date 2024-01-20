@@ -27,50 +27,77 @@
 Comme ca j'ai pas besoin d'index. Et j'aurais la taille pour le malloc.
 */
 
-char    *get_next_line(int fd)
-{
-    //lire le fd jusqu'au bout et afficher la lecture.
-    static char *final_line;
-    char    tmp_line[BUFFER_SIZE];
-    char    *tmp;
-    int fd_read;
-    int i;
-    int len_final_line;
 
-    i = 0;
-    len_final_line = ft_strlen(final_line);
-    fd_read = read(fd, tmp_line, BUFFER_SIZE);
-    if(fd_read <= 0)
+//gnl_p_t ici on récupere les octets de fd jusqu'a '\0' et on le donne final_line.
+//cependant read à fortement avancer et peut-être même dépasser de plusieurs char le '\0'.
+//Il faut donc relancer le read mais à partir de la taille de final_line.
+char    *gnl_part_two(int fd, char *final_line){
+    char *line;
+    int fd_read;
+
+    line = NULL;
+    line = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char*));//Allocation de mémoire de la taille de la macro BUFFER_SIZE.
+    if(!line)
     {
         return(NULL);
     }
-    //final_line = (char*)malloc((BUFFER_SIZE + len_final_line + 1) * sizeof(char*));
+    fd_read = 1;//Genre de booleen pour lancer la boucle de fd_read une première fois.
+    while(!ft_strchr(line, '\n') && fd_read != 0)
+    {
+        fd_read = read(fd, line, BUFFER_SIZE);//lecture de fd et donné x*BUFFER_SIZE octet de fd à line. 
+        if(fd_read == -1)
+        {
+            free(line);
+            return(NULL);
+        }
+        line[fd_read] = '\0';//on mets la dernière valeur de line à '\0' pour dire que c'est une chaine de caractere bien terminée.
+        final_line = ft_strjoin(final_line, line);//on donne comme valeur à notre static, la jointure de l'ancienne statique et la line lu par read.
+        //On relance la boucle si line de read ne comporte pas de char '\0' et que read n'a pas retourner 0 pour dire qu'il est terminé.
+        //Au deuxième appel de la boucle, line contiendra les nouveaux octets lus depuis le descripteur de fichier fd, 
+        //et ces octets seront ajoutés à la fin de la variable statique final_line. 
+        //La valeur de line dans la boucle reflétera les données lues lors de cet appel spécifique à read.
+    }
+    free(line);
+    return(final_line);
+}
+
+
+char    *get_next_line(int fd)
+{
+    printf("-------------------------------------- 1.1----------------------------\n");
+    //lire le fd jusqu'au bout et afficher la lecture.
+    //comment voir si c'est le premiere appel de la fonction ?
+    static char *final_line;
+    char    *tmp_line;
+    char    *tmp;
+    int i;
+
+
+
+    i = 0;
+    if(fd < 0 && BUFFER_SIZE <= 0)
+    {
+        return(0);// pourquoi zero est pas NULL ?
+    }
+    final_line = gnl_part_two(fd, final_line);
+    //ici on a recopier la line jusqu'a '\n' dans la static. Mais maintenant, on doit recommencer le processus à partir de la longueur de final_line.
+    printf("-------------------------------------- 1.1.2----------------------------\n");
+    printf("-------------------------------------- 1.2----------------------------\n");
+    printf("-------------------------------------- 1.3----------------------------\n");
+    printf("-------------------------------------- 1.4----------------------------\n");
+    printf("-------------------------------------- 1.5----------------------------\n");
     if(!final_line)
     {
         return(NULL);
     }
-    if(len_final_line == 0)//si la longueur de statuc line == 0, ca veut dire ue c'est la premiere fois que l'on utilise. Donc on la rempli normalement.
-    {
-        final_line = ft_strdup(tmp_line);
-        if(!final_line)
-        {
-            return(NULL);
-        }
-    }
-    else//si la len de final_line est != de 0, on doit ajouter les char de line à partir de la fin de final_line.
-    {
-        tmp = ft_strjoin(final_line, tmp_line);
-        free(final_line);
-        final_line = tmp;
-        if(!final_line)
-        {
-            return(NULL);
-        }
-    }
+    printf("-------------------------------------- 1.6----------------------------\n");
+    printf("-------------------------------------- 1.7----------------------------\n");
     // fn qui va afficher ce que final_tmp contient pour voir la différence avec tmp_line.
     if(final_line)
     {
+        printf("-------------------------------------- 1.8----------------------------\n");
         ft_putstr(final_line);
     }
+    printf("-------------------------------------- 1.9----------------------------\n");
     return(final_line);
 }
