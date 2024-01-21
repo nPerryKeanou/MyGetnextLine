@@ -10,7 +10,9 @@
 #include "fcntl.h"
 #include <sys/types.h>
 
+#ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024
+#endif
 
 char    *get_next_line(int fd);
 char    *ft_strchr(char    *s, int c);

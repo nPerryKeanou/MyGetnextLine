@@ -93,76 +93,73 @@ char    *ft_new_line(char *final_line)
 //cependant read à fortement avancer et peut-être même dépasser de plusieurs char le '\0'.
 
 char    *ft_read_and_return_final_line(int fd, char *final_line){
-    printf("-------------------------------------- 1.2  1 ----------------------------\n");
     char *line;
     int fd_read;
 
     line = NULL;
     line = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char*));//Allocation de mémoire de la taille de la macro BUFFER_SIZE.
-    printf("-------------------------------------- 1.2  2 ----------------------------\n");
     if(!line)
     {
         return(NULL);
     }
-    printf("-------------------------------------- 1.2  3 ----------------------------\n");
     fd_read = 1;//Genre de booleen pour lancer la boucle de fd_read une première fois.
-    printf("-------------------------------------- 1.2  4 ----------------------------\n");
     while(!ft_strchr(line, '\n') && fd_read != 0)
     {
-        printf("-------------------------------------- 1.2  4.2 ----------------------------\n");
         fd_read = read(fd, line, BUFFER_SIZE);//lecture de fd et donné x*BUFFER_SIZE octet de fd à line.
-        printf("-------------------------------------- 1.2  4.3 ----------------------------\n"); 
         if(fd_read == -1)
         {
             free(line);
             return(NULL);
         }
-        printf("-------------------------------------- 1.2  4.4 ----------------------------\n");
         line[fd_read] = '\0';//on mets la dernière valeur de line à '\0' pour dire que c'est une chaine de caractere bien terminée.
-        printf("-------------------------------------- 1.2  4.5 ----------------------------\n");
         final_line = ft_strjoin(final_line, line);//on donne comme valeur à notre static, la jointure de l'ancienne statique et la line lu par read.
         //On relance la boucle si line de read ne comporte pas de char '\0' et que read n'a pas retourner 0 pour dire qu'il est terminé.
         //Au deuxième appel de la boucle, line contiendra les nouveaux octets lus depuis le descripteur de fichier fd, 
         //et ces octets seront ajoutés à la fin de la variable statique final_line. 
         //La valeur de line dans la boucle reflétera les données lues lors de cet appel spécifique à read.
-        printf("-------------------------------------- 1.2  4.6 ----------------------------\n");
     }
-    printf("-------------------------------------- 1.2  5 ----------------------------\n");
     free(line);
-    printf("-------------------------------------- 1.2  6 ----------------------------\n");
     return(final_line);
 }
 
 
+
+/**
+ * la fonction get_next_line(int fd) retourne une ligne lu.
+ * En utilisant une variable statique, on peux lire tout un 'fichier' selon le nombre de fois que l'on appel la g_n_l.
+ * 
+ * 
+ *
+*/
 char    *get_next_line(int fd)
 {
-    printf("-------------------------------------- 1.1----------------------------\n");
-    //lire le fd jusqu'au bout et afficher la lecture.
-    //comment voir si c'est le premiere appel de la fonction ?
     static char *final_line;
     char    *tmp_line;
-    char    *tmp;
 
+    //vérification du fd et de BUFFER_SIZE.
+    //Si le fd est plus petit que 0, cela est un erreur.
+    //Si BUFFER_SIZE est plus petit ou égale à 0, cela ne sert à rien d'aller plus loin.
     if(fd < 0 && BUFFER_SIZE <= 0)
     {
-        return(0);// pourquoi zero est pas NULL ?
+        // pourquoi zero est pas NULL ?
+        //icin nous retournons une erreur est non un NULL car NULL est généralement utilisé pour représenter un pointeur.
+        return(0);
     }
-    printf("-------------------------------------- 1.2----------------------------\n");
+    //Changement de la valeur de la statique avec la fonction ft_read_and_return_final_line(). 
     final_line = ft_read_and_return_final_line(fd, final_line);
-    printf("-------------------------------------- 1.3----------------------------\n");
+    //Si la fonction ft_read_and_return_final_line à retourner un char* NULL, on retourne NULL et on arrête la fonction.
     if(!final_line)
     {
         return(NULL);
     }
-    printf("-------------------------------------- 1.4----------------------------\n");
+    //Changement de la valeur de tmp_line avec la fonction ft_new_line().
     tmp_line = ft_new_line(final_line);
-    printf("-------------------------------------- 1.5----------------------------\n");
     //La condition if (!tmp_line) vérifie si la variable tmp_line est égale à NULL. En langage C, NULL est généralement utilisé pour représenter un pointeur nul, c'est-à-dire qu'il ne pointe vers aucune zone de mémoire.
     if(!tmp_line){
         return(NULL);
     }
-    printf("-------------------------------------- 1.6----------------------------\n");
+    //Changement de la valeur de la statique final_line avec la fonction ft_new_final_line().
     final_line = ft_new_final_line(final_line);
-    printf("-------------------------------------- 1.7----------------------------\n");
+    //Retour de gnl en envoyer le char* final_line.
     return(final_line);
 }

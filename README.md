@@ -31,21 +31,24 @@ Vous devriez pouvoir appeler get_next_line() une fois avec le fd 3, puis le 4, l
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 
-Les fonctions open() et close() sont des fonctions fondamentales en programmation informatique. Elles permettent d'ouvrir et de fermer des ressources, telles que des fichiers, des sockets ou des connexions réseau.
 
-La fonction read() retourne le nombre d'octets lus, ou -1 en cas d'erreur.
 
-Si la fonction read() réussit, elle retourne le nombre d'octets lus depuis le fichier ou le socket spécifié. Ce nombre peut être inférieur au nombre d'octets demandé si le fichier ou le socket est terminé, ou s'il n'y a pas assez d'espace dans le tampon.
+Un file descriptor (descripteur de fichier) est un entier qui représente une "connexion" vers un fichier ou un objet semblable à un fichier, dans le contexte des systèmes d'exploitation de type Unix (comme Linux et macOS). Ce n'est pas le fichier lui-même, mais plutôt une référence abstraite qui permet au système d'exploitation d'identifier et de gérer ce fichier.
 
-Si la fonction read() échoue, elle retourne -1 et errno est mis à jour pour indiquer la raison de l'échec. Les erreurs courantes incluent :
+Un file descriptor peut représenter différents types d'objets, tels que des fichiers, des sockets, des tubes (pipes), des périphériques, etc. Les trois descripteurs de fichiers standard les plus courants sont :
 
-EBADF : le descripteur de fichier spécifié est invalide.
-EAGAIN : le système n'a pas de données disponibles pour le moment.
-EIO : une erreur d'E/S s'est produite.
-EINVAL : le nombre d'octets demandés est invalide.
-ENOMEM : la mémoire n'a pas pu être allouée pour le tampon.
+0 (stdin) : Le descripteur standard d'entrée. Il est associé au clavier par défaut.
+1 (stdout) : Le descripteur standard de sortie. Il est associé à l'écran par défaut.
+2 (stderr) : Le descripteur standard d'erreur. Il est également associé à l'écran par défaut.
+Lorsque vous ouvrez un fichier ou que vous créez une connexion réseau, le système d'exploitation vous attribue un file descriptor pour représenter cette connexion. Vous pouvez ensuite utiliser ce file descriptor pour effectuer des opérations de lecture, d'écriture ou d'autres opérations associées à ce fichier ou à cet objet.
 
-------------------------------------------------------------------------------------------------------------------------------------------
+En résumé, un file descriptor est une référence numérique associée à un fichier ou à une ressource semblable à un fichier, et il est utilisé pour interagir avec cette ressource à travers les appels système appropriés.
+
+
+
+
+
+
 
 La fonction get_next_line est une fonction qui permet de lire une ligne d'un fichier, une ligne à la fois.
 
