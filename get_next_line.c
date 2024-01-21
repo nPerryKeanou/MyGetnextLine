@@ -1,38 +1,16 @@
 #include "get_next_line.h"
-/*
-    Les fonctions open() et close() sont fondamentales en programmation informatique. Elles permettent l'ouverture et la fermetures de ressoureces
-    , telles que des fichiers, des sockets ou des connexion réseau.
-*/
-
 
 /**
- * 
- * 1) Donc soit on lit sur l'entrée standard soit on lit depuis un fichiers ou les deux en même temps. avec open et read
- * 2) Il faut parcourir le fichier tant que l'on tombe sur un '\0', un EOF ou un NULL. avec ft_strnstr modifier
- * 3) IL faut stocker la ligne parcourut dans un buffer. Donc je dois allouer de la mémoire par rapport a ce que read renvoie comme valeur.
- *          read retourne le nb d'octet lu ou -1 en cas d'erreur.
- * 4) Il faut afficher cette ligne qui est stocké dans un buffer.
- * Et recommencer le processus.
-
- * 1-2 : On recupére fd pour savoir si on doit lire sur l'entre standard ou dans un fichier précis.
-*/
-
-//!!!!!!!!!!!!!!!!!!!!!!!!! utiliser memeset ou boucler mo-même pour mettre toutes les valeurs char à 0 lors de la créations d'un tab de char pour être sur qu'il n'y a pas de valeurs qui traine.
-/*
-    Pour lire le fichier ligne par ligne, il faut appeler la fonction get_next_line à répétition jusqu'à ce que la fonction retourne NULL. Cela signifie que la fonction n'a pas pu lire de ligne supplémentaire.
-
-
-- je vais essaier d'avoir une seul statique, qui sera un int. Ce sera le retour de read, et au prochain appel, repartira à partir de ce int index.
-- Pour ce faire, je peux stocker le buffer et pour lire la derniere ligne recun je peux lancer une fn qui va afficher les chars en la dernier et l'avant dernierx occurence de \0
-Comme ca j'ai pas besoin d'index. Et j'aurais la taille pour le malloc.
-*/
-
+ * Cette fonction va retourner la nouvelle valeur de final_line, qui est le reste de la lecture de read apres '\n'.
+ * Car il est possible que read à lu plus d'octets qu'il ne fallait.
+ */
 char    *ft_new_final_line(char *final_line){
     int i;
     int j;
     char   *new_line;
 
     i = 0;
+    //On incrémente la variable i du nombre d'octet parcourut dans final_line jusqu'a ce que l'on tombe sur un octet qui vaut '\n' ou la fin de chaine ('\0').
     while(final_line[i] != '\0' && final_line[i] != '\n'){
         i++;
     }
@@ -40,87 +18,118 @@ char    *ft_new_final_line(char *final_line){
         free(final_line);
         return(NULL);
     }
+    //On alloue l'espace mémoire de la taille de cla chaine final_line - la valeur de la variable i qui est le nd d'octet avant que l'octet dans final_line soit égale à '\0' ou '\n' + 1 (pour l'octet fin de chaîne).
     new_line = (char*)malloc((ft_strlen(final_line) - i + 1) * sizeof(char));
     if(!new_line){
         return(NULL);
     }
+    //On incrémente la variable i pour passer au dessus du l'octet qui vaut '\0' ou '\n'.
     i++;
     j = 0;
+    //On boucle sur la varibale final_line jusqu'a l'octet de valeur '\0'.
+    //new_line les octet de new_line vont recevoir les valeurs des octets de final_line.
+    //new_line[0] va recevoir final_line[à partir  '\n'  + 1];
     while(final_line[j]){
         new_line[j] = final_line[i];
         j++;
         i++;
     }
     new_line[j] = '\0';
+    //on free l'ancienne valeur de statique et on lui rentourne la nouvelle valeur.
     free(final_line);
     return(new_line);
 }
 
 
+/**
+ * Cete fonction va retouner une nouvelle de caractères.
+ * Cette nouvelle chaine, sera en sorte, la final_chaine jusqu'a l'octet qui vaut '\n'.
+ * 
+ */
 char    *ft_new_line(char *final_line)
 {
     int i;
     char *new_line;
 
     i = 0;
-    //La condition if (!final_line[i]) vérifie si le caractère à l'index i de la chaîne final_line est nul ('\0'). En langage C, la fin d'une chaîne de caractères est marquée par un caractère nul.
+    //ON vérifie si l'index de final_line est NULL, si oui, on retourne NULL.
     if(!final_line[i]){
         return(NULL);
     }
+    //On incrémente la variable i tant que l'index de final_line est différent ddes chars '\0' et '\n'.
+    //Cette variable va nous donner la valeur pour l'allocation de l'esp&ce mémoire de la chaine de caractère.
     while(final_line[i] != '\0' && final_line[i] != '\n'){
         i++;
     }
+    //On alloue l'espace mémoire de new_line avec la variable i et on lui ajoute deux octets.
     new_line = (char*)malloc((i + 2) * sizeof(char));
     if(new_line == NULL)
     {
         return(NULL);
     }
     i = 0;
+    //On remet la variable i à 0 et on parcourt la final_line tant que la valeur de l'index est différent des chars '\0' et '\n'.
+    //En parcourant cette variable, on donne à notre nouvelle chaine allouée en amont, la valeur des chars des index parcourut.
     while(final_line[i] != '\0' && final_line[i] != '\n')
     {
         new_line[i] = final_line[i];
         i++;
     }
+    //Si le char de l'index i égale '\n', sait que ca ne sert à rien d'aller plus loin.
+    //La boucle s'est arrété. On lui assigne à la main cette valeur, on incrémente de 1 et on lui donnera le char de fin de chaîne.
     if(final_line[i] == '\n'){
         new_line[i] = final_line[i];
         i++;
     }
     new_line[i] = '\0';
+    //on retourne la nouvelle chaine de caractere.
     return(new_line);
 }
 
-//gnl_p_t ici on récupere les octets de fd jusqu'a '\0' et on le donne final_line.
-//cependant read à fortement avancer et peut-être même dépasser de plusieurs char le '\0'.
 
+
+/**
+ * Cette function va renvoyer une nouvelle chaine de caractère.
+ * Cette nouvelle chaine est la lecture de read selon le BUFFER_SIZE ou si on trouve un octet égale au char '\n' + l'ancienne chaien final_line.
+*/
 char    *ft_read_and_return_final_line(int fd, char *final_line){
     char *line;
     int fd_read;
-
+    //On met *line à NULL pour être sûr de démrrer sur de bonnes bases.
     line = NULL;
-    line = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char*));//Allocation de mémoire de la taille de la macro BUFFER_SIZE.
+    line = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char*));//Allocation de mémoire de la taille du BUFFER_SIZE donné ou de celui dans le gnl.h.
     if(!line)
     {
         return(NULL);
     }
-    fd_read = 1;//Genre de booleen pour lancer la boucle de fd_read une première fois.
+    //Donner 1 comme valeur à fd_read car celui ci lancera notre lecture. Dans la boucle, lorsque read aura fini la lecture, il vaudra 0.
+    fd_read = 1;
+    //Tant qu'un octet de line ne vaut pas la valeur le char '\n' ou que read re vaut pas 0 en atteignant la fin du fichier.
     while(!ft_strchr(line, '\n') && fd_read != 0)
     {
-        fd_read = read(fd, line, BUFFER_SIZE);//lecture de fd et donné x*BUFFER_SIZE octet de fd à line.
+        //fd_read vaudra le retour de read(), qui sera le nb d'octet lu soit par la valeur de BUFFER_SIZE soit par le retour de read qui sera 0 car il aura fini le fichier. 
+        fd_read = read(fd, line, BUFFER_SIZE);
+        //Si fd_read vaut moins 1, c'est qu'il y a eu une erreur dans la lecture.
+        //On devra donc free l'espace mémoire de *line que nous avons malloc en amont et retourner NULL.
         if(fd_read == -1)
         {
             free(line);
             return(NULL);
         }
-        line[fd_read] = '\0';//on mets la dernière valeur de line à '\0' pour dire que c'est une chaine de caractere bien terminée.
-        final_line = ft_strjoin(final_line, line);//on donne comme valeur à notre static, la jointure de l'ancienne statique et la line lu par read.
-        //On relance la boucle si line de read ne comporte pas de char '\0' et que read n'a pas retourner 0 pour dire qu'il est terminé.
-        //Au deuxième appel de la boucle, line contiendra les nouveaux octets lus depuis le descripteur de fichier fd, 
-        //et ces octets seront ajoutés à la fin de la variable statique final_line. 
-        //La valeur de line dans la boucle reflétera les données lues lors de cet appel spécifique à read.
+        //On donne le char '\0' de fin de chaine à *line pour préciser que c'est une chaîne de caractères.
+        //On lui donne donc la longueur parcourut par read. En sachant que les tableau commence toujours à l'index 0.
+        line[fd_read] = '\0';
+        //On change la valeur de final_line avec ce que read à lu et stocker dans le buffer *line.
+        final_line = ft_strjoin(final_line, line);
     }
+    //Après avoir changer la valeur de final_line en ajoutant ce que read à lu et stocké dans *line, on free l'espace mémoire donné à *line.
     free(line);
+    //On retourne la nouvelle chaine final_line.
     return(final_line);
 }
+
+
+
 
 
 
@@ -160,6 +169,6 @@ char    *get_next_line(int fd)
     }
     //Changement de la valeur de la statique final_line avec la fonction ft_new_final_line().
     final_line = ft_new_final_line(final_line);
-    //Retour de gnl en envoyer le char* final_line.
+    //Retour de gnl en renvoyant le char* final_line.
     return(final_line);
 }
