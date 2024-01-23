@@ -4,40 +4,56 @@
  * Cette fonction va retourner la nouvelle valeur de final_line, qui est le reste de la lecture de read apres '\n'.
  * Car il est possible que read à lu plus d'octets qu'il ne fallait.
  */
-char    *ft_new_final_line(char *final_line){
-    int i;
-    int j;
-    char   *new_line;
+char *ft_new_final_line(char *final_line) {
+    int i = 0;
+    int j = 0;
+    char *new_line;
 
-    i = 0;
-    //On incrémente la variable i du nombre d'octet parcourut dans final_line jusqu'a ce que l'on tombe sur un octet qui vaut '\n' ou la fin de chaine ('\0').
-    while(final_line[i] != '\0' && final_line[i] != '\n'){
+    // On incrémente la variable i du nombre d'octets parcourus dans final_line jusqu'à ce que l'on tombe sur un octet qui vaut '\n' ou la fin de chaîne ('\0').
+    while (final_line[i] != '\0' && final_line[i] != '\n') {
         i++;
     }
-    if(!final_line[i]){
+
+    // Si final_line[i] vaut '\0', cela signifie que nous avons atteint la fin de la chaîne, nous libérons la mémoire de final_line et retournons NULL.
+    if (!final_line[i]) {
         free(final_line);
-        return(NULL);
+        return NULL;
     }
-    //On alloue l'espace mémoire de la taille de cla chaine final_line - la valeur de la variable i qui est le nd d'octet avant que l'octet dans final_line soit égale à '\0' ou '\n' + 1 (pour l'octet fin de chaîne).
+
+    // On alloue l'espace mémoire pour la nouvelle chaîne qui contient la partie de final_line après '\n' ou jusqu'à la fin de la chaîne.
     new_line = (char*)malloc((ft_strlen(final_line) - i + 1) * sizeof(char));
-    if(!new_line){
-        return(NULL);
+    if (!new_line) {
+        return NULL;
     }
-    //On incrémente la variable i pour passer au dessus du l'octet qui vaut '\0' ou '\n'.
+
+    // On incrémente la variable i pour passer au-dessus de l'octet qui vaut '\0' ou '\n'.
     i++;
-    j = 0;
-    //On boucle sur la varibale final_line jusqu'a l'octet de valeur '\0'.
-    //new_line les octet de new_line vont recevoir les valeurs des octets de final_line.
-    //new_line[0] va recevoir final_line[à partir  '\n'  + 1];
-    while(final_line[j]){
+
+    // On copie les octets de final_line dans new_line à partir de '\n' + 1.
+    while (final_line[i] != '\0') {
         new_line[j] = final_line[i];
         j++;
         i++;
     }
+
     new_line[j] = '\0';
-    //on free l'ancienne valeur de statique et on lui rentourne la nouvelle valeur.
+
+    // On libère l'ancienne valeur de final_line et on alloue de la mémoire suffisante avant de copier new_line dans final_line.
     free(final_line);
-    return(new_line);
+    final_line = (char*)malloc((ft_strlen(new_line) + 1) * sizeof(char));
+    if (!final_line) {
+        free(new_line);
+        return NULL;
+    }
+
+    // On copie new_line dans final_line.
+    ft_strcpy(final_line, new_line);
+
+    // On libère la mémoire de new_line.
+    free(new_line);
+
+    // On retourne la nouvelle valeur de final_line.
+    return final_line;
 }
 
 
@@ -103,27 +119,62 @@ char    *ft_read_and_return_final_line(int fd, char *final_line){
         return(NULL);
     }
     //Donner 1 comme valeur à fd_read car celui ci lancera notre lecture. Dans la boucle, lorsque read aura fini la lecture, il vaudra 0.
-    fd_read = 1;
-    //Tant qu'un octet de line ne vaut pas la valeur le char '\n' ou que read re vaut pas 0 en atteignant la fin du fichier.
-    while(!ft_strchr(line, '\n') && fd_read != 0)
-    {
-        //fd_read vaudra le retour de read(), qui sera le nb d'octet lu soit par la valeur de BUFFER_SIZE soit par le retour de read qui sera 0 car il aura fini le fichier. 
+    if(final_line == NULL){
         fd_read = read(fd, line, BUFFER_SIZE);
-        //Si fd_read vaut moins 1, c'est qu'il y a eu une erreur dans la lecture.
-        //On devra donc free l'espace mémoire de *line que nous avons malloc en amont et retourner NULL.
         if(fd_read == -1)
         {
             free(line);
             return(NULL);
         }
+        if(fd_read == 0){
+            return(line);
+        }
+        line[fd_read] = '\0';
+        final_line= ft_strjoin(final_line, line);
+        if(final_line == NULL)
+        {
+            free(final_line);
+            free(line);
+            return(NULL);
+        }
+
+    }
+    //ICI line vaudra deja les X octet de BUFFER_SIZE
+    //Tant qu'un octet de line ne vaut pas la valeur le char '\n' ou que read re vaut pas 0 en atteignant la fin du fichier.
+    //dans cette condition de boucle, on boucle tant qu'octet de line ne vaut pas '\n' ou que read est différent de 0.
+    //En lancant cette conditon, read fait une première lecture.
+    //while(!ft_strchr(line, '\n') && read(fd, line, BUFFER_SIZE) != 0)
+    while(!ft_strchr(line, '\n') && fd_read != 0)
+    {
+        //fd_read vaudra le retour de read(), qui sera le nb d'octet lu soit par la valeur de BUFFER_SIZE soit par le retour de read qui sera 0 car il aura fini le fichier. 
+        //fd_read = read(fd, line, BUFFER_SIZE);
+        //Si fd_read vaut moins 1, c'est qu'il y a eu une erreur dans la lecture.
+        //On devra donc free l'espace mémoire de *line que nous avons malloc en amont et retourner NULL.
+        fd_read = read(fd, line, BUFFER_SIZE);
+        if(fd_read == -1)
+        {
+            free(line);
+            return(NULL);
+        }
+        if(fd_read == 0){
+            return(line);
+        }
         //On donne le char '\0' de fin de chaine à *line pour préciser que c'est une chaîne de caractères.
         //On lui donne donc la longueur parcourut par read. En sachant que les tableau commence toujours à l'index 0.
         line[fd_read] = '\0';
         //On change la valeur de final_line avec ce que read à lu et stocker dans le buffer *line.
-        final_line = ft_strjoin(final_line, line);
+        final_line= ft_strjoin(final_line, line);
+        if(final_line == NULL)
+        {
+            free(final_line);
+            free(line);
+            return(NULL);
+        }
+        
     }
     //Après avoir changer la valeur de final_line en ajoutant ce que read à lu et stocké dans *line, on free l'espace mémoire donné à *line.
-    free(line);
+    //free(line); est ce vraiment nécessaire ?
+
     //On retourne la nouvelle chaine final_line.
     return(final_line);
 }
@@ -140,11 +191,14 @@ char    *ft_read_and_return_final_line(int fd, char *final_line){
  * 
  *
 */
+//////////////////////////////////////////////////////JE DOIS BOUCLER MA GNL ET QANDD CELLE CI EST FINI, JE DOIS FREE MA STATIQUE ., C'EST LA LA FUITE DE MÉMOIRE
 char    *get_next_line(int fd)
 {
     static char *final_line;
     char    *tmp_line;
 
+    final_line = NULL;
+    tmp_line = NULL;
     //vérification du fd et de BUFFER_SIZE.
     //Si le fd est plus petit que 0, cela est un erreur.
     //Si BUFFER_SIZE est plus petit ou égale à 0, cela ne sert à rien d'aller plus loin.
@@ -170,5 +224,5 @@ char    *get_next_line(int fd)
     //Changement de la valeur de la statique final_line avec la fonction ft_new_final_line().
     final_line = ft_new_final_line(final_line);
     //Retour de gnl en renvoyant le char* final_line.
-    return(final_line);
+    return(tmp_line);
 }

@@ -19,6 +19,7 @@ char    *ft_strchr(char    *s, int c);
 char    *ft_strjoin(char *s1, char *s2);
 char    *ft_new_line(char *final_line);
 char    *ft_new_final_line(char *final_line);
+char *ft_strcpy(char *dest, char *src);
 
 
 size_t  ft_strlen(char *s);

@@ -96,3 +96,10 @@ Voici un diagramme qui illustre le fonctionnement de la fonction get_next_line :
 
 
 Le buffer de read() est vide au début. Au fur et à mesure que read() lit des octets, il les stocke dans le buffer. Une fois la lecture terminée, le buffer contient tous les octets qui ont été lus.
+
+
+
+
+Avec un BUFFER_SIZE de 1, la fonction read lit seulement un caractère à la fois, ce qui peut entraîner des problèmes dans la gestion du retour à la ligne ('\n'). Puisque get_next_line lit un caractère à la fois et vérifie s'il s'agit d'un retour à la ligne, cela peut introduire des problèmes dans la gestion des sauts de ligne, surtout si une ligne est plus longue que le BUFFER_SIZE.
+
+Par exemple, si une ligne a une longueur de 10 caractères et que BUFFER_SIZE est 1, cela signifie que get_next_line devra effectuer 10 appels à read pour lire toute la ligne. Cela peut entraîner des problèmes lors de la gestion du tampon et du suivi de l'état entre les appels successifs à get_next_line.
