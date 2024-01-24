@@ -86,6 +86,47 @@
 
 
     4) Check les conditons des boucles pour savoir quand commence et quand s'arretr la fn gnl ,ect...
-    
+        Donc pour stopper gnl et free la static, je dois avoir une boolen qui sera envoye en paramêtre à la fn qui va utiliser read, 
+        lorsque read aura fini de lire le fichier, la boolen envoyé en paramêtre sera modifier.
+        Dans gnl si la boolen vaudra 0, on pourra return free statuc et return la line.
+
+
+    Lets go comme ca et inshalla.
 */
+
+#include "get_next_line.h"
+
+
+char    *ft_get_static(char *line_static, int boole_read)
+{
+
+}
+
+char *get_next_line(int fd){
+    static char     *line_static;
+    char            *line_return;
+    char            *tmp_static;
+    int             boole_read;
+    
+
+    if(fd < 0 || BUFFER_SIZE < 1)
+    {
+        return(0);
+    }
+    boole_read = 1;
+    while(boole_read == 1)
+    {
+        //line_static sera créé dans gnl et alloué dans get_static.
+        //on lui donne donc l'emplacement de la variable static en paramêtre.
+        line_static = ft_get_static(&line_static, boole_read);
+        //ici attention a ce que lie_static n'ai pas une allocation de mémoire qui à été fait avant que l'on tombe sur une erreur.
+        if(line_static == NULL || boole_read == 0)
+        {
+            return(0);
+        }
+    }
+    return(line_return);
+}
+
+
 
