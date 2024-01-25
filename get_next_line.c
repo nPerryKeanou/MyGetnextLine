@@ -102,18 +102,55 @@
 #include "get_next_line.h"
 
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!ATTENTION cette fn crée un espace mémoire et le return pour une variable dans la fonction principal, quand dois free cette espace ?
+char    *ft_new_static(char **s_line_static)
+{
+    char    *tmp_line_static;
+    int i;
+    int j;
+    int k;
+    int l;
+
+    tmp_line_static = NULL;
+    i = 0;
+    j = 0;
+    l = 0;
+    while(s_line_static[i] != '\n' || s_line_static[i] != 0){
+        if(s_line_static[i] == '\n'){
+            j = 1;
+        }
+        i++;
+    }
+    tmp_line_static = (char*)malloc((ft_strlen(s_line_static) - i + 1) * sizeof(char*));
+    if(tmp_line_static == NULL)
+    {
+        return(NULL);
+    }
+    i++;
+    //ici il faut copier les chars de s_line_static à partir (ft_strlen(s_line_static) - i + 1) jusqu'a la fin.
+    while(l < (ft_strlen(s_line_static) - i + 1)){
+        tmp_line_static[l] = s_line_static[i];
+        l++;
+        i++;
+    }
+    tmp_line_static[l] = '\0';
+    return(tmp_line_static);
+}
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!ATTENTION cette fn crée un espace mémoire et le return pour une variable dans la fonction principal, quand dois-je free cet espace alloué ?
 char    *ft_get_line_return(char **s_line_static){
     char    *tmp_line_return;
     int i;
     int j;
+    int k;
 
     tmp_line_return = NULL;
     i = 0;
     j = 0;
-    while(s_line_static[i] != '\0'){
+    k = 0;
+    while(s_line_static[i] != '\0' || k == 0){
         if(s_line_static[i] == '\n')
         {
+            k = 1;
             j = i;
         }
         i++;
@@ -204,7 +241,14 @@ char *get_next_line(int fd){
         //ceci se fera avec la fn get_line_return
         //Que faire si c'est la fin du fichiers et que read vaut 0 ?
         //rien en change au déroulement de cette fonction, on devra voir plus tard a tout free et ne plus pouvoir utiliser les fn car le fichiers sera fini.
+        //donc on devra free line_return. Quand et combien de fois vu que c'est la variable à return.
         line_return = ft_get_line_return(&line_static);
+        //maintenant, il faut changer la static car elle est suceptible d'avoir des chars apres l'octet '\n'.
+        //Donc on va la modifier pour retirer les chars deja utilisé et garder les non utilisé.
+        line_static = ft_new_static(&line_static);
+        //////////////////////////
+        /////////////////////////
+        //ICI on va check tout les malloc qui doivent être free, pdnt gnl ou à la fin.
     }
     return(line_return);
 }
