@@ -38,12 +38,15 @@
             Je devrais faire un tmp qui va stocker le join, free l'ancienne static et lui donner la tmp qui a eu le join.
             --- Ne pas directement changer les valeurs des chars car cela peut amener des erreur. toujours utiliser des copies et bien malloc et free.
 
+            On doit faire un malloc de taille 1 pour le premier appel de gnl car la statique sera vide.
+            Mais Comment savoir i 
+
         ((((( ok donc ici on a notre static.  )))))
 
     1.2) maintenant, on doit récuperer notre static et lui extirper la line qui va être retourner.
         Cette line va donc valoir, x octets de la static. Du premier octet jusqu'a ce que octet vale '\n'.
         Je devrais donc récuperer la variable depuis la fn get_next_line en paramêtre.
-        Il y aura deux boucles, la premiere qui va boulcer jusqu'a octet '\n'.
+        Il y aura deux boucles, la premiere qui va boucler jusqu'a octet '\n'.
         La deuxieme va boucler le nb de la premiere pour ajouter à la tmp, les octets de statique.
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ICI J'AI UN MALLOC !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             Donc attention, savoir ce qui à était alloue, qui va utiliser cette allocation, et savoir quand la free .
@@ -79,6 +82,8 @@
         .
         .
 
+        Il faut free les chars lorsqu'il y a une erreur ou que le programme/la fn se termine. On ne doit pas free la variable, avant, on peux changer sa valeur ou son adresse mais pas free si on la reutilise apres.
+
     3)  - get_next_line(int fd);
         - ft_get_static(char *line_static, );
         - ft_get_line_return();
@@ -97,13 +102,82 @@
 #include "get_next_line.h"
 
 
-char    *ft_get_static(char *line_static, int boole_read)
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!ATTENTION cette fn crée un espace mémoire et le return pour une variable dans la fonction principal, quand dois free cette espace ?
+char    *ft_get_line_return(char **s_line_static){
+    char    *tmp_line_return;
+    int i;
+    int j;
+
+    tmp_line_return = NULL;
+    i = 0;
+    j = 0;
+    while(s_line_static[i] != '\0'){
+        if(s_line_static[i] == '\n')
+        {
+            j = i;
+        }
+        i++;
+    }
+    if(j > 0){
+        tmp_line_return = (char*)malloc((j + 1) * sizeof(char*));
+        if(tmp_line_return == NULL){
+            return(NULL);
+        }
+    }
+    i = 0;
+    while(i < j){
+        tmp_line_return[i] = s_line_static[i];
+        i++;
+    }
+    tmp_line_return[i] = '\0';
+    return(tmp_line_return);
+}
+
+
+///////////////////////////////////////////////////////
+//malloc recu par ft_strjoin
+//malloc crée pour le buf de la fn read. Vérifie comment gerer l'espace mémoire de la fn read, si elle le fait elle même ou si on doit free a chaque appel de la fn
+//Dans tout les cas, on devra free le char* buf crée. Quand ?
+char    *ft_get_static(char **line_static, int boole_read, int fd)
 {
+    int nb_read;
+    char    *tmp;
+    char    *buf;
+
+    nb_read = 0;
+    if(!*line_static){
+        tmp = NULL;
+    }else{
+        tmp = *line_static;
+    }
+    buf = (char*)malloc((BUFFER_SIZE + 1) * sizeof(char*));
+    if(buf == NULL)
+    {
+        return(NULL);
+    }
+    //donc ici j'utilise la fn read tant que son buffer ne contient pas de char '\0' ou que read n'a pas fini le fichier.
+    //En meme temps, j'ajoute à la static, ce que read lit dans son buf grâce à la fonction ft_strjoin.
+    while(!ft_strrchr(buf, '\n') || nb_read != 0)
+    {
+        nb_read = read(fd, buf, BUFFER_SIZE);
+        if(nb_read < 0)
+        {
+            return(NULL);
+        }
+        tmp = ft_strjoin(tmp,buf);
+        if(tmp == NULL){//ici vérifier ce que fais ft_strjoin en cas d'erreur pour ne pas oublier ou ne pas free une variable deja free.
+            return(NULL);
+        }
+    }
+    //ici on est soit tombé sur un char '\0' soit read a fini sa lecture.
+    //donc on doit return le char* qui contient les lectures de read.
+    //donc ici on a un malloc. Et ft_strjoin nous envoies aussi un malloc. Ce malloc sera free lorsque que nous ferons un free de la static car nous donnons à l'adresse d la static, la line de ft_strjoin.
+    return(tmp);
 
 }
 
 char *get_next_line(int fd){
-    static char     *line_static;
+    static char     **line_static;
     char            *line_return;
     char            *tmp_static;
     int             boole_read;
@@ -118,12 +192,19 @@ char *get_next_line(int fd){
     {
         //line_static sera créé dans gnl et alloué dans get_static.
         //on lui donne donc l'emplacement de la variable static en paramêtre.
-        line_static = ft_get_static(&line_static, boole_read);
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ATTENTION, ici dans cette fn je passe l'adresse du pointeur de line static en paramêtre, je lui donne la valeur de tmp_ft_strjoin et puis je retourne line_static.
+        line_static = ft_get_static(&line_static, boole_read, fd);
         //ici attention a ce que lie_static n'ai pas une allocation de mémoire qui à été fait avant que l'on tombe sur une erreur.
         if(line_static == NULL || boole_read == 0)
         {
             return(0);
         }
+        //ici on est soit tombé sur un char '\0' soit read a fini sa lecture.
+        //donc on doit récuperer les chars jusqu'a l'octet '\n' qui sont dans la statique et les donner au une tmp à return.
+        //ceci se fera avec la fn get_line_return
+        //Que faire si c'est la fin du fichiers et que read vaut 0 ?
+        //rien en change au déroulement de cette fonction, on devra voir plus tard a tout free et ne plus pouvoir utiliser les fn car le fichiers sera fini.
+        line_return = ft_get_line_return(&line_static);
     }
     return(line_return);
 }

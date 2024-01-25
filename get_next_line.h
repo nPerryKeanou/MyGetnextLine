@@ -15,4 +15,10 @@
 #endif
 
 
+size_t ft_strlen(char *str);
+
+
+char    *ft_strrchr(char *s, int c);
+char *ft_strjoin(char *s1_tmp, char *s2_buf);
+
 #endif
