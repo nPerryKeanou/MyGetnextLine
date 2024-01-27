@@ -102,156 +102,74 @@
 #include "get_next_line.h"
 
 
-char    *ft_new_static(char **s_line_static)
-{
-    char    *tmp_line_static;
-    int i;
-    int j;
-    int k;
-    int l;
-
-    tmp_line_static = NULL;
-    i = 0;
-    j = 0;
-    l = 0;
-    while(s_line_static[i] != '\n' || s_line_static[i] != 0){
-        if(s_line_static[i] == '\n'){
-            j = 1;
-        }
-        i++;
-    }
-    tmp_line_static = (char*)malloc((ft_strlen(s_line_static) - i + 1) * sizeof(char*));
-    if(tmp_line_static == NULL)
-    {
-        return(NULL);
-    }
-    i++;
-    //ici il faut copier les chars de s_line_static à partir (ft_strlen(s_line_static) - i + 1) jusqu'a la fin.
-    while(l < (ft_strlen(s_line_static) - i + 1)){
-        tmp_line_static[l] = s_line_static[i];
-        l++;
-        i++;
-    }
-    tmp_line_static[l] = '\0';
-    return(tmp_line_static);
-}
-
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!ATTENTION cette fn crée un espace mémoire et le return pour une variable dans la fonction principal, quand dois-je free cet espace alloué ?
-char    *ft_get_line_return(char **s_line_static){
-    char    *tmp_line_return;
-    int i;
-    int j;
-    int k;
-
-    tmp_line_return = NULL;
-    i = 0;
-    j = 0;
-    k = 0;
-    while(s_line_static[i] != '\0' || k == 0){
-        if(s_line_static[i] == '\n')
-        {
-            k = 1;
-            j = i;
-        }
-        i++;
-    }
-    if(j > 0){
-        tmp_line_return = (char*)malloc((j + 1) * sizeof(char*));
-        if(tmp_line_return == NULL){
-            return(NULL);
-        }
-    }
-    i = 0;
-    while(i < j){
-        tmp_line_return[i] = s_line_static[i];
-        i++;
-    }
-    tmp_line_return[i] = '\0';
-    return(tmp_line_return);
-}
-
-
-///////////////////////////////////////////////////////
-//malloc recu par ft_strjoin
-//malloc crée pour le buf de la fn read. Vérifie comment gerer l'espace mémoire de la fn read, si elle le fait elle même ou si on doit free a chaque appel de la fn
-//Dans tout les cas, on devra free le char* buf crée. Quand ?
-char    *ft_get_static(char **line_static, int boole_read, int fd)
-{
-    int nb_read;
-    char    *tmp;
+char    *ft_get_static(int fd, char *tmp_line_static){
+    //ce char* va prendre la valeur de buf de read.
+    //ici on retourne un char * qui va être récuperer par la statique.
+    //Donc ce char* va être en premier lieux ( vu que static ne vaut rien),
+    //être la valeur du buf de read.
+    //DOnc on va utiliser un strup et puis un strcpy.
+    //Mais comment savoir quand faire ca et pas directement les join ?
+    //On peut avoir des conditions qui vont check si  static et null ou si static[0] == 0 
+    //on peux soit comparer line ici ou dans gnl direct avec des boole.
+    char    *str;
+    //on doit créer et alloué le buf que va utiliser read.
     char    *buf;
+    int nb_read;
 
-    nb_read = 0;
-    if(!*line_static){
-        tmp = NULL;
-    }else{
-        tmp = *line_static;
-    }
+    str = NULL;
     buf = (char*)malloc((BUFFER_SIZE + 1) * sizeof(char*));
     if(buf == NULL)
     {
         return(NULL);
     }
-    //donc ici j'utilise la fn read tant que son buffer ne contient pas de char '\0' ou que read n'a pas fini le fichier.
-    //En meme temps, j'ajoute à la static, ce que read lit dans son buf grâce à la fonction ft_strjoin.
-    while(!ft_strrchr(buf, '\n') || nb_read != 0)
+    //il ne faut pas oublier que la static est la une chaine de caractere qui va être soit un ou plusieurs buffer_size à la suite jusqu'au moment où l'on tombe sur un '\n' ou que read == 0.
+    //donc on doit tout de même lancer la fn read.
+    //si static n'existe pas encore, on la crée avec un copie de buf.
+    //sinon, on utilise ft_strjoin pour assembler l'ancienne statique et le new buf de read.
+    //
+    //il faut boucler pour que buf de read trouve un '\n'.
+    //on va donc à chaque tour de boucle, ajouter le buf dans  une tmp de static car le buf va être changer à chaque appel de read.
+    //Une fois que l'ajout est fait dans la tmp de static, on doit la chek pour voir si un de ses octets == '\n'.
+    //comment faire ?
+    //on peut lancer la fn_strrchr, qui retourne un pointeur lorsque l'on tombe sur un octet recherhcer.
+    //Donc on peux boucler tant que ft_strrcrh nous return NULL car sa voudrait dire qu'on n'a pas trouve de '\n'
+    //mais pour lancer la boucle sur cette fn, il faut que que tmp ait une valeur, donc un premier buf. et pour avoir un premier buf, il faut avoir fait un premier appel à read().
+    //ici on fait le premier appel a read et on va le stocker direct dans str. Ensuite on lance la boucle de ft_strrchr() et on va utiliser read pour lire le fichier et ft_strjoin pour ajouter le buf de read avant qu'il ne change dans str.
+    //si la boucle s'arrete, ca veux dire que str (qui aura un ou plusieurs buf de read) contiendra un char '\n'.
+    //et ca veux dire aussi que str peux avoir le rest du buf apres le char '\n'.
+    //On devra donc faire ensuite appel à une autre fn qui va récuper les chars jusqu'a '\n' et la return
+    //et une autre fn, qui va changer la statique avec les autrs chars de str apres '\n'
+    // et on relance gnl selon le main.
+    if(tmp_line_static == NULL || !tmp_line_static)
     {
         nb_read = read(fd, buf, BUFFER_SIZE);
-        if(nb_read < 0)
+        if(nb_read <= 0)
         {
             return(NULL);
         }
-        tmp = ft_strjoin(tmp,buf);
-        if(tmp == NULL){//ici vérifier ce que fais ft_strjoin en cas d'erreur pour ne pas oublier ou ne pas free une variable deja free.
+        str = ft_strdup(buf);
+        if(str == NULL)
+        {
             return(NULL);
         }
+        str[ft_strlen(str)] = '\0';
     }
-    //ici on est soit tombé sur un char '\0' soit read a fini sa lecture.
-    //donc on doit return le char* qui contient les lectures de read.
-    //donc ici on a un malloc. Et ft_strjoin nous envoies aussi un malloc. Ce malloc sera free lorsque que nous ferons un free de la static car nous donnons à l'adresse d la static, la line de ft_strjoin.
-    return(tmp);
-
-}
-
-char *get_next_line(int fd){
-    static char     **line_static;
-    char            *line_return;
-    char            *tmp_static;
-    int             boole_read;
     
-
-    if(fd < 0 || BUFFER_SIZE < 1)
-    {
-        return(0);
-    }
-    boole_read = 1;
-    while(boole_read == 1)
-    {
-        //line_static sera créé dans gnl et alloué dans get_static.
-        //on lui donne donc l'emplacement de la variable static en paramêtre.
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ATTENTION, ici dans cette fn je passe l'adresse du pointeur de line static en paramêtre, je lui donne la valeur de tmp_ft_strjoin et puis je retourne line_static.
-        line_static = ft_get_static(&line_static, boole_read, fd);
-        //ici attention a ce que lie_static n'ai pas une allocation de mémoire qui à été fait avant que l'on tombe sur une erreur.
-        if(line_static == NULL || boole_read == 0)
-        {
-            return(0);
-        }
-        //ici on est soit tombé sur un char '\0' soit read a fini sa lecture.
-        //donc on doit récuperer les chars jusqu'a l'octet '\n' qui sont dans la statique et les donner au une tmp à return.
-        //ceci se fera avec la fn get_line_return
-        //Que faire si c'est la fin du fichiers et que read vaut 0 ?
-        //rien en change au déroulement de cette fonction, on devra voir plus tard a tout free et ne plus pouvoir utiliser les fn car le fichiers sera fini.
-        //donc on devra free line_return. Quand et combien de fois vu que c'est la variable à return.
-        line_return = ft_get_line_return(&line_static);
-        //maintenant, il faut changer la static car elle est suceptible d'avoir des chars apres l'octet '\n'.
-        //Donc on va la modifier pour retirer les chars deja utilisé et garder les non utilisé.
-        line_static = ft_new_static(&line_static);
-        //////////////////////////
-        /////////////////////////
-        //ICI on va check tout les malloc qui doivent être free, pdnt gnl ou à la fin.
-    }
-    return(line_return);
+    return(str);
 }
 
+char    *get_next_line(int fd)
+{
+    static char *line_static;
+    char        *line_return;
+    char        *line_tmp;
+    int         i;
 
-
+    //vérifier si fd est correct et qu'un buffer_size de taille correct est ok.
+    if(fd < 0 && BUFFER_SIZE <= 0)
+    {
+        return(NULL);
+    }
+    //ici, il faut lancer la fn qui va lancer la boucle read et creer la statique.
+    line_static = ft_get_static(fd);
+}

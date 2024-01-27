@@ -1,8 +1,8 @@
 #include "get_next_line.h"
 
 
-size_t ft_strlen(char *str){
-    size_t i;
+int ft_strlen(char *str){
+    int i;
 
     i = 0;
     while(str[i] != '\0'){
@@ -12,10 +12,10 @@ size_t ft_strlen(char *str){
 }
 
 char    *ft_strrchr(char *s, int c){
-    size_t i;
-    size_t len_s;
+    int i;
+    int len_s;
 
-    i = ft_strlent(s);
+    i = ft_strlen(s);
     len_s = ft_strlen(s);
     if(s == NULL){
         return(NULL);
@@ -33,63 +33,69 @@ char    *ft_strrchr(char *s, int c){
 }
 
 
+char    *ft_strdup(char  *s1){
+    size_t i;
+    size_t len_s1;
+    char    *new_s1;
+
+    i = 0;
+    len_s1 = ft_strlen_const(s1);
+    new_s1 = (char *)malloc(len_s1 + 1 * sizeof(char));
+    if(new_s1 == NULL){
+        return (NULL);
+    }
+    while(i < len_s1){
+        new_s1[i] = s1[i];
+        i++;
+    }
+    new_s1[i] = '\0';
+    return(new_s1);
+}
+
+
+
 
 //donc cette fn va joindre l'ancienne statique et la nouvelle lecture de read.
 //il faut faire attention au première appel de strjoin car s1_tmp vaudra null, donc on devra faire un ecart et faire un malloc de 1 et puis join
 //si s2 vaut null, c'est qu'il y a eu un probleme dans le read et donc normalement le probleme a du être regler avant l'appel de ft_strjoin mais par acquis
 //de conscience, on va return NULL
+//
+//strjoin ne va pas gerer les erreurs ou quoi que ce soit, on va lui laisser son boulot normale.
+//je vais plutot créer une autre fonction qui va gerer le cas de s1_tmp null ou uatre?
 char *ft_strjoin(char *s1_tmp, char *s2_buf){
     int i;
     int j;
-    char *line_to_return;
+    char *str;
 
     i = 0;
     j = 0;
-    line_to_return = NULL;
-    if(s2_buf == NULL){
-        return(NULL);
-    }
-    if(s1_tmp == NULL){//donc c'est le premier appel et on dois donner un espace mémoire pour utiliser ft_strjoin
-        line_to_return = (char*)malloc(1 * sizeof(char*));
-        if(line_to_return == NULL)
-        {
-            return(NULL);
-        }
-    }
-    line_to_return = (char*)malloc((ft_strlen(s1_tmp) + ft_strlen(s2_buf) + 1) * sizeof(char*));
-    if(line_to_return == NULL)
+    str = (char*)malloc((ft_strlen(s1_tmp) + ft_strlen(s2_buf) + 1) * sizeof(char*));
+    if(str == NULL)
     {
         return(NULL);
     }
-    //ici on va copier ce qu'il y a dans s1 vers line_to_return
-    //puis on copier ce qu'il y a dans s2 vers line_to_return
-    while(s1_tmp[i] != '\0'){
-        line_to_return[i] = s1_tmp[i];
+    //si s1_tmp est valide, sinon , on passe direct au deuxieme
+    while(s1_tmp[i] != '\0')
+    {
+        str[i] = s1_tmp[i];
         i++;
     }
-    //ici s1_tmp[i] == '\0' mais on doit passer au dessus pour continuer a ajouter la s2_buf dans line_to_return
-    //donc je stoppe la lecture de s1_tmp car il est fini. mais j'incrémente i de 1 pour continuer l'ajout.
-    i++;
-    while(s2_buf[j] != '\0'){
-        line_to_return[i] = s2_buf[j];
+    //s1_tmp[i] == '\0' donc on et str[i] ici ne vaut rien, on doit lui passer l'autre s2
+    while(s2_buf[j] != '\0')
+    {
+        str[i] = s2_buf[j];
         i++;
         j++;
     }
-    //maintenant que tout a été copier dans line_to_return, je peux lui ajouter le char final et le return.
-    line_to_return[i] = '\0';
-    //donc ici line_to_return vaut la concatenation de s1 + s2. AVEC ou SANS le char '\n'.
-    //et je vais la return
-    *s1_tmp = line_to_return;
-    return(s1_tmp);
-    //return(s1_tmp);
-    //free(line_to_return);
-    /*
-            Oui, vous avez raison, on ne free pas line_to_return dans la version modifiée du code.
-            La raison en est que la variable statique s1_tmp est une variable persistante, ce qui signifie qu'elle existera pendant toute la durée de vie du programme. Par conséquent, la mémoire allouée pour line_to_return sera libérée automatiquement lorsque la variable s1_tmp sera détruite.
-    */
-    //mais quand est ce que je dois free line_to_return ?
-    //Car dans cette fonction, je cree un nouveau char* et je lui alloue un nouvel espace mémoire.
-    
-    // Je pourrais donc copier la valeur de line_to_return dans la static que j'ai passé en paramêtre et ensuite free l'allocation de mémorie.
-    //et ne rien return.
+    str[i] = '\0';
+    //donc ici on join les deux chaines de caraceteres dans le char* str.
+    //on peut maintenant, le retourner.
+    return(str);
+    //il ne faudra pas oublier de le free dans la fn gnl qui va donner ce return à la static.
+    //mais si s1 ou s2 n'exsite pas ou valennt null ?
 }
+
+
+//cette fonction va créer un espace mémoire de la taille de BUFFER_SIZE car on va copier le buf de read.
+//Cette fn va aider a la boucle de read et join pour la static
+//Je peux juste utiliser une strdup et strcpy pour le debut de a fn read and join.
