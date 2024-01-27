@@ -101,8 +101,67 @@
 
 #include "get_next_line.h"
 
+char    *ft_new_static(char *line_static_param, char *line_return_param)
+{
+    char    *str_new_static;
+    int i;
+    //int len_line_return_param;
+    //int len_line_static_param;
+    int len_total;
+    int j;
 
-char    *ft_get_static(int fd, char *tmp_line_static){
+    str_new_static = NULL;
+    i = 0;
+    // len_line_return_param = ft_strlen(line_return_param);
+    // len_line_static_param = ft_strlen(len_line_static_param);
+    len_total = ft_strlen(line_static_param) - ft_strlen(line_return_param);
+    str_new_static = (char*)malloc((len_total + 1) * sizeof(char*));
+    if(str_new_static == NULL)
+    {
+        return(NULL);//verif des free
+    }
+    j = ft_strlen(line_return_param);
+    while(i < len_total)
+    {
+        str_new_static[i] = line_static_param[j];
+        i++;
+        j++;
+    }
+    str_new_static[i] = '\0';
+    //ici je dois free mon ancienne statique pour faire place a la nouvelle.
+    //comment dois-je faire ? 
+    //passer l'adresse de static en paramêtre pour la free ici.
+    free(line_static_param);
+    return(str_new_static);
+}
+
+char    *ft_get_line_return(char *line_static_param)
+{
+    char    *line_to_return;
+    int i;
+    int j;
+
+    line_to_return = NULL;
+    i = 0;
+    while(line_static_param[i] != '\n')
+    {
+        i++;//i vaudra l'index où se trouve le char '\n' dans la static.
+    }
+    line_to_return = (char*)malloc((i + 1) * sizeof(char*));//ce malloc devra être free. il est créé a chaque appel de gnl.
+    if(line_to_return == NULL)
+    {
+        return(NULL);
+    }
+    while(j < i)
+    {
+        line_to_return[j] = line_static_param[j];
+        j++;
+    }
+    line_to_return[j] = '\0';
+    return(line_to_return);
+}
+
+char    *ft_get_static(int fd, char *tmp_line_static, int *nb_read_param){
     //ce char* va prendre la valeur de buf de read.
     //ici on retourne un char * qui va être récuperer par la statique.
     //Donc ce char* va être en premier lieux ( vu que static ne vaut rien),
@@ -114,7 +173,7 @@ char    *ft_get_static(int fd, char *tmp_line_static){
     char    *str;
     //on doit créer et alloué le buf que va utiliser read.
     char    *buf;
-    int nb_read;
+    
 
     str = NULL;
     buf = (char*)malloc((BUFFER_SIZE + 1) * sizeof(char*));
@@ -142,19 +201,38 @@ char    *ft_get_static(int fd, char *tmp_line_static){
     // et on relance gnl selon le main.
     if(tmp_line_static == NULL || !tmp_line_static)
     {
-        nb_read = read(fd, buf, BUFFER_SIZE);
-        if(nb_read <= 0)
+        nb_read_param = read(fd, buf, BUFFER_SIZE);
+        if(nb_read_param <= 0)
         {
+            free(buf);
             return(NULL);
         }
-        str = ft_strdup(buf);
+        str = ft_strdup(buf);//ici j'ai str qui devra être free un moment ou un autre.
         if(str == NULL)
         {
+            free(buf);
             return(NULL);
         }
         str[ft_strlen(str)] = '\0';
     }
-    
+    //dans tout les cas, que tmp_line_static soit NULL ou non, on check la boucle.
+    //donc ici on boucle le read et ft_strjoin tant que ft_strrchr retourne NULL(donc qu'il ne trouve pas de '\n') et que read ne retourne pas 0(pour la fin de la lecture du fichier).
+    while(ft_strrchr(str, '\n') == NULL && nb_read_param > 0)
+    {
+        nb_read_param = read(fd, buf, BUFFER_SIZE);
+        if(nb_read_param <= 0)
+        {
+            free(buf);
+            return(NULL);
+        }   
+        str = ft_strjoin(tmp_line_static, buf);
+        if(str == NULL)
+        {
+            free(buf);
+            return(NULL);
+        }
+    }
+    free(buf);
     return(str);
 }
 
@@ -162,14 +240,53 @@ char    *get_next_line(int fd)
 {
     static char *line_static;
     char        *line_return;
-    char        *line_tmp;
     int         i;
+    int         *nb_read;
 
     //vérifier si fd est correct et qu'un buffer_size de taille correct est ok.
     if(fd < 0 && BUFFER_SIZE <= 0)
     {
-        return(NULL);
+        return(NULL);// verif de bien free chaque malloc
     }
     //ici, il faut lancer la fn qui va lancer la boucle read et creer la statique.
-    line_static = ft_get_static(fd);
+    nb_read = 1;
+    line_static = ft_get_static(fd, line_static, &nb_read);
+    if(line_static == NULL)
+    {
+        return(NULL);// verif de bien free chaque malloc
+    }
+    //maintenant que nous avons notre static avec un octet qui vaut un '\n', on va creer un char* qui va récuperer les chars jusque '\n'.
+    //ce char* sera retourner.
+    line_return = ft_get_line_return(line_static);
+    if(line_return == NULL)
+    {
+        free(line_static);
+        return(NULL);// verif de bien free chaque malloc
+    }
+    if(nb_read == 0)
+    {
+        free(line_static);
+        //comment free line_return et la retounrer ?
+        return(line_return);
+    }
+    //maintenant que nous avons la line a retourner, nous devons modifier si c'est necessaire, la statique
+    //pour qu'elle redémrre à partir des chars non utulisés apres la line-to_return.
+    line_static = ft_new_static(line_static, line_return);
+    return(line_return);
+    //voila, il faut free les malloc qui ne vivent que dans un seul appel.
+    //il faut aussi free la static quand gnl est fini.
+    //
+    /*
+    Comme malloc nous avons :
+            - line_static :
+                * 1ere allocation dans ft_get_static
+                Elle est ensuite utilisé dans la fn line_return, donc on ne peux pas la free avant son utilisation.
+                * 2eme allocation dans ft_new_static
+                On ne la free que lorsque gnl est fini.
+                Comment savoir si gnl est fini ? gnl est fini si n'importe où, on return NULL ou si le fichier est fini et que l'on va retourner la derniere line lu.
+                Comment savoi si read est fini ? On peut utliser un int boolean qui prendra la valeur de nb_read. OU on peut utiliser directement nb_read dans gnl et le passer en paramtre dans ft_get_static.
+                
+            - line_return
+            //line_return devra être free dans la fonction qui appel gnl.
+    */
 }

@@ -15,14 +15,15 @@
 #endif
 
 
-int ft_strlen(char *str);
-
-
+char    *get_next_line(int fd);
+char    *ft_get_static(int fd, char *tmp_line_static, int *nb_read_param);
+char    *ft_get_line_return(char *line_static_param);
+char    *ft_new_static(char *line_static_param, char *line_return_param);
 char    *ft_strrchr(char *s, int c);
 char    *ft_strdup(char  *s1);
 char *ft_strjoin(char *s1_tmp, char *s2_buf);
-char    *ft_get_static(int fd);
-char *get_next_line(int fd);
+
+int ft_strlen(char *str);
 
 
 #endif
