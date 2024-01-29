@@ -22,6 +22,7 @@ char    *ft_new_static(char *line_static_param, char *line_return_param);
 char    *ft_strrchr(char *s, int c);
 char    *ft_strdup(char  *s1);
 char *ft_strjoin(char *s1_tmp, char *s2_buf);
+char *ft_strcpy(char *dest, char *src);
 
 void    ft_putchar(char c);
 void    ft_putstr(char *str);
