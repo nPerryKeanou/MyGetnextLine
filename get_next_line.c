@@ -103,6 +103,9 @@
 
 char    *ft_new_static(char *line_static_param, char *line_return_param)
 {
+    printf(" - 5.1 - -\n");
+    printf("line_static_param --> %s\n",line_static_param);
+    printf("line_return_param --> %s\n", line_return_param);
     char    *str_new_static;
     int i;
     //int len_line_return_param;
@@ -115,53 +118,83 @@ char    *ft_new_static(char *line_static_param, char *line_return_param)
     // len_line_return_param = ft_strlen(line_return_param);
     // len_line_static_param = ft_strlen(len_line_static_param);
     len_total = ft_strlen(line_static_param) - ft_strlen(line_return_param);
+    printf("len static -> %d\n", ft_strlen(line_static_param));
+    printf("len return -> %d\n", ft_strlen(line_return_param));
+    printf("len total static - return -> %d\n", len_total);
     str_new_static = (char*)malloc((len_total + 1) * sizeof(char*));
     if(str_new_static == NULL)
     {
         return(NULL);//verif des free
     }
+    printf(" - 5.2 - -\n");
     j = ft_strlen(line_return_param);
+    printf(" - 5.3 - -\n");
     while(i < len_total)
     {
         str_new_static[i] = line_static_param[j];
         i++;
         j++;
     }
+    printf(" - 5.4 - -\n");
     str_new_static[i] = '\0';
     //ici je dois free mon ancienne statique pour faire place a la nouvelle.
     //comment dois-je faire ? 
     //passer l'adresse de static en paramêtre pour la free ici.
-    free(line_static_param);
+    //free(line_static_param);
+    printf(" - 5.5 - -\n");
+    printf("new_static --> %s\n", str_new_static);
+    printf(" - 5.6 - -\n");
     return(str_new_static);
 }
 
+//probleme dans la boucle while car line_static_param[0] == '\n', je dois donc passer outre ce char. Dans quelle fn ? dans get_static
 char    *ft_get_line_return(char *line_static_param)
 {
+    printf("B 1 ----------------------------------------------------------------- ---------------- -------------- --------- -------\n");
     char    *line_to_return;
     int i;
     int j;
 
     line_to_return = NULL;
     i = 0;
-    while(line_static_param[i] != '\n')
+    j = 0;
+    printf("B 2 ----------------------------------------------------------------- ---------------- -------------- --------- -------\n");
+    printf("line_static_param --> %s\n", line_static_param);
+    //ici on a u probleme car dans le fichier, on a une nouvelle ligne qui est composé de un ou plusieurs '\n'
+    //la condition ne rentre donc pas dans la boucle.
+    if(line_static_param[i] == '\n')
     {
+        while(line_static_param[i] == '\n')
+        {
+            i++;
+        }
+    }
+    while(line_static_param[i] != '\n' && line_static_param[i] != '\0')
+    {
+        printf("|||| line_static_param[%d] == %c\n", i, line_static_param[i]);
         i++;//i vaudra l'index où se trouve le char '\n' dans la static.
     }
+    printf("B 3 ----------------------------------------------------------------- ---------------- -------------- --------- -------\n");
+    printf("len de line_static_param == i --> %d\n", i);
     line_to_return = (char*)malloc((i + 1) * sizeof(char*));//ce malloc devra être free. il est créé a chaque appel de gnl.
     if(line_to_return == NULL)
     {
         return(NULL);
     }
+    printf("B 4 ----------------------------------------------------------------- ---------------- -------------- --------- -------\n");
     while(j < i)
     {
         line_to_return[j] = line_static_param[j];
         j++;
     }
+    printf("B 5 ----------------------------------------------------------------- ---------------- -------------- --------- -------\n");
     line_to_return[j] = '\0';
+    //ici il y a un probleme, la line a retourner devrait être fini mais elle ne l'est pas. Le problème vient de plus haut, peut être de la boucle de static, c'est sur même.
+    printf("line_to_return - - - -> %s\n", line_to_return);
     return(line_to_return);
 }
 
-char    *ft_get_static(int fd, char *tmp_line_static, int *nb_read_param){
+char    *ft_get_static(int fd, char *tmp_line_static, size_t *nb_read_param){
     //ce char* va prendre la valeur de buf de read.
     //ici on retourne un char * qui va être récuperer par la statique.
     //Donc ce char* va être en premier lieux ( vu que static ne vaut rien),
@@ -174,13 +207,14 @@ char    *ft_get_static(int fd, char *tmp_line_static, int *nb_read_param){
     //on doit créer et alloué le buf que va utiliser read.
     char    *buf;
     
-
+    printf("2.2 - -\n");
     str = NULL;
-    buf = (char*)malloc((BUFFER_SIZE + 1) * sizeof(char*));
+    buf = (char*)malloc((BUFFER_SIZE) * sizeof(char*));
     if(buf == NULL)
     {
         return(NULL);
     }
+    printf("2.3 - -\n");
     //il ne faut pas oublier que la static est la une chaine de caractere qui va être soit un ou plusieurs buffer_size à la suite jusqu'au moment où l'on tombe sur un '\n' ou que read == 0.
     //donc on doit tout de même lancer la fn read.
     //si static n'existe pas encore, on la crée avec un copie de buf.
@@ -201,47 +235,78 @@ char    *ft_get_static(int fd, char *tmp_line_static, int *nb_read_param){
     // et on relance gnl selon le main.
     if(tmp_line_static == NULL || !tmp_line_static)
     {
-        nb_read_param = read(fd, buf, BUFFER_SIZE);
+        printf("2.3.2-  - -\n");
+        printf("||||||||||||||||||||||||||||||||||||||||||||||||||| tmp_line_static == NULL || !tmp_line_static |||||||||||||||||||||||||||||||||||||||\n");
+        *nb_read_param = read(fd, buf, BUFFER_SIZE);
+        printf("nb_read --> %zu\n", *nb_read_param);
         if(nb_read_param <= 0)
         {
             free(buf);
             return(NULL);
         }
+        buf[*nb_read_param] = '\0';
+        printf("2.3.3-  - -\n");
         str = ft_strdup(buf);//ici j'ai str qui devra être free un moment ou un autre.
         if(str == NULL)
         {
             free(buf);
             return(NULL);
         }
+        printf("2.3.4-  - -\n");
         str[ft_strlen(str)] = '\0';
+        printf("str --> %s\n", str);
+        printf("2.3.5-  - -\n");
+        tmp_line_static = str;
+        free(str);
+        //ici on devra free str et pas tmp_line_static.
     }
+    printf("2.4 - -\n");
+    printf("str - - - - - > %s\n", str);
+    //ici str est null, donc je dois lui allouer de la mémoire, on va faire un if else
+    //pourquoi tmp_line_static ne vaut plus rien ? Elle est censé stocker la line
+    printf("tmp_line_static -> %s\n\n", tmp_line_static);
+    printf("nb_read --> %zu\n", *nb_read_param);
     //dans tout les cas, que tmp_line_static soit NULL ou non, on check la boucle.
     //donc ici on boucle le read et ft_strjoin tant que ft_strrchr retourne NULL(donc qu'il ne trouve pas de '\n') et que read ne retourne pas 0(pour la fin de la lecture du fichier).
-    while(ft_strrchr(str, '\n') == NULL && nb_read_param > 0)
+    printf("retour de ft_strrchr(tmp_line_static, '\n') --1 %s\n", ft_strrchr(tmp_line_static, '\n'));
+    printf("nb_read_param ---> %zu\n", *nb_read_param);
+    while(ft_strrchr(tmp_line_static, '\n') == NULL && *nb_read_param > 0)
     {
-        nb_read_param = read(fd, buf, BUFFER_SIZE);
+        printf("--------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+        printf("2.4.2 - - -\n");
+        *nb_read_param = read(fd, buf, BUFFER_SIZE);
         if(nb_read_param <= 0)
         {
             free(buf);
             return(NULL);
         }   
-        str = ft_strjoin(tmp_line_static, buf);
-        if(str == NULL)
+        buf[*nb_read_param] = '\0';
+        printf("2.4.3 - - -\n");
+        tmp_line_static = ft_strjoin(tmp_line_static, buf);
+        printf("tmp_line_static apres ft_strjoin --> %s\n", tmp_line_static);
+        if(tmp_line_static == NULL)
         {
             free(buf);
             return(NULL);
         }
+        printf("2.4.4 - - -\n");
+        printf("tmp_line_static in while(ft_strrch)  --> %s\n", tmp_line_static);
     }
+    ft_putstr("2.5 - -\n");
     free(buf);
-    return(str);
+    ft_putstr("2.6 - -\n");
+    return(tmp_line_static);
 }
 
+
+
+//la premiere appele de gnl fonctionne ,c'est au deuxieme que ca bug.
 char    *get_next_line(int fd)
 {
+    printf("1 -\n");
     static char *line_static;
     char        *line_return;
-    int         i;
-    int         *nb_read;
+    size_t         nb_read;
 
     //vérifier si fd est correct et qu'un buffer_size de taille correct est ok.
     if(fd < 0 && BUFFER_SIZE <= 0)
@@ -250,11 +315,13 @@ char    *get_next_line(int fd)
     }
     //ici, il faut lancer la fn qui va lancer la boucle read et creer la statique.
     nb_read = 1;
+    printf("2 -\n");
     line_static = ft_get_static(fd, line_static, &nb_read);
     if(line_static == NULL)
     {
         return(NULL);// verif de bien free chaque malloc
     }
+    printf("3 -\n");
     //maintenant que nous avons notre static avec un octet qui vaut un '\n', on va creer un char* qui va récuperer les chars jusque '\n'.
     //ce char* sera retourner.
     line_return = ft_get_line_return(line_static);
@@ -263,15 +330,21 @@ char    *get_next_line(int fd)
         free(line_static);
         return(NULL);// verif de bien free chaque malloc
     }
+    printf("4 -\n");
     if(nb_read == 0)
     {
         free(line_static);
         //comment free line_return et la retounrer ?
         return(line_return);
     }
+    printf("5 -\n");
     //maintenant que nous avons la line a retourner, nous devons modifier si c'est necessaire, la statique
     //pour qu'elle redémrre à partir des chars non utulisés apres la line-to_return.
+    printf("5 in gnl ---- \n static -> %s \n line_returb -> %s \n", line_static, line_return);
     line_static = ft_new_static(line_static, line_return);
+    printf("6 -\n");
+    printf("new_static after ft_new_static() --> %s\n", line_static);
+    printf("7 -\n");
     return(line_return);
     //voila, il faut free les malloc qui ne vivent que dans un seul appel.
     //il faut aussi free la static quand gnl est fini.
